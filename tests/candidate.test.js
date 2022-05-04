@@ -1,0 +1,181 @@
+const { parseCandidate } = require("../src/lib/candidate.js")
+
+it.each([
+  [
+    'w',
+    {
+      raw: 'w',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: [],
+      modifiers: [],
+      type: 'utility',
+      name: 'w',
+    },
+  ],
+  [
+    'w-4',
+    {
+      raw: 'w-4',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: [],
+      modifiers: [],
+      type: 'utility',
+      name: 'w-4',
+    },
+  ],
+  [
+    'sm:w',
+    {
+      raw: 'sm:w',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ['sm'],
+      modifiers: [],
+      type: 'utility',
+      name: 'w',
+    },
+  ],
+  [
+    'w-[2px]',
+    {
+      raw: 'w-[2px]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: [],
+      modifiers: [],
+      type: 'custom',
+      name: 'w',
+      value: '2px',
+    },
+  ],
+  [
+    'sm:w-[2px]',
+    {
+      raw: 'sm:w-[2px]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ['sm'],
+      modifiers: [],
+      type: 'custom',
+      name: 'w',
+      value: '2px',
+    },
+  ],
+  [
+    'sm:w-[2px]/20',
+    {
+      raw: 'sm:w-[2px]/20',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ['sm'],
+      modifiers: ['20'],
+      type: 'custom',
+      name: 'w',
+      value: '2px',
+    },
+  ],
+  [
+    'sm:w-[2px]/[0.55]',
+    {
+      raw: 'sm:w-[2px]/[0.55]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ['sm'],
+      modifiers: [{ type: 'custom', value: '0.55' }],
+      type: 'custom',
+      name: 'w',
+      value: '2px',
+    },
+  ],
+  [
+    'sm:w-[calc(0.5rem_+_1px)]',
+    {
+      raw: 'sm:w-[calc(0.5rem_+_1px)]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ['sm'],
+      modifiers: [],
+      type: 'custom',
+      name: 'w',
+      value: 'calc(0.5rem + 1px)',
+    },
+  ],
+  [
+    '[width:2px]',
+    {
+      raw: '[width:2px]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: [],
+      modifiers: [],
+      type: 'property',
+      name: 'width',
+      value: '2px',
+    },
+  ],
+  [
+    'sm:[width:2px]',
+    {
+      raw: 'sm:[width:2px]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ["sm"],
+      modifiers: [],
+      type: 'property',
+      name: 'width',
+      value: '2px',
+    },
+  ],
+  [
+    'sm:focus:[width:2px]',
+    {
+      raw: 'sm:focus:[width:2px]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ["sm", "focus"],
+      modifiers: [],
+      type: 'property',
+      name: 'width',
+      value: '2px',
+    },
+  ],
+  [
+    'sm:[@media(min-width:200px)]:[width:2px]',
+    {
+      raw: 'sm:[@media(min-width:200px)]:[width:2px]',
+      important: false,
+      negative: false,
+      prefix: "",
+      variants: ["sm", { type: "custom", value: "@media(min-width:200px)" }],
+      modifiers: [],
+      type: 'property',
+      name: 'width',
+      value: '2px',
+    },
+  ],
+  [
+    '[http://example.com]',
+    null,
+  ],
+])('should be possible to parse: "%s"', (input, expected) => {
+  let actual = parseCandidate(input, {
+    tailwindConfig: {
+      separator: ':',
+    },
+  })
+
+  expect(actual).toEqual(expected)
+})
