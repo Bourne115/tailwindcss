@@ -11,7 +11,7 @@ type CandidateCommon = {
   modifiers: CandidateModifier[]
 }
 
-export type CandidateVariant = string | { source: 'custom'; value: string }
-export type CandidateModifier = string | { source: 'custom'; value: string }
+export type CandidateVariant = string | { type: 'custom'; value: string }
+export type CandidateModifier = string | { type: 'custom'; value: string }
 
 export type Candidate = CandidateCommon & CandidateTypes

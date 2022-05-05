@@ -1,9 +1,12 @@
+// @ts-check
+
 /** @typedef {import('./candidate.d').Candidate} Candidate */
 /** @typedef {import('./candidate.d').CandidateVariant} CandidateVariant */
+/** @typedef {import('./candidate.d').CandidateModifier} CandidateModifier */
 
-const { normalize } = require('../util/dataTypes.js')
-const { default: isValidArbitraryValue } = require('../util/isValidArbitraryValue.js')
-const { isParsableCssValue } = require('./generateRules.js')
+import { normalize } from '../util/dataTypes.js'
+import isValidArbitraryValue from '../util/isValidArbitraryValue.js'
+import { isParsableCssValue } from './generateRules.js'
 
 /** @type {Map<string, Candidate | null>} */
 let candidateCache = new Map()
@@ -14,7 +17,7 @@ let candidateCache = new Map()
  * @param {any} context
  * @returns {Candidate | null}
  */
-function parseCandidate(raw, context) {
+export function parseCandidate(raw, context) {
   let candidate = candidateCache.get(raw)
 
   if (!candidate) {
@@ -29,7 +32,7 @@ function parseCandidate(raw, context) {
  *
  * @param {string} raw
  * @param {any} context
-  * @returns {Candidate | null}
+ * @returns {Candidate | null}
  */
 function parseRawCandidate(raw, context) {
   let candidate = parseStructure(raw, context)
@@ -39,7 +42,7 @@ function parseRawCandidate(raw, context) {
   }
 
   // Ignore invalid custom property names
-  if (candidate.type === 'property' && !isValidPropName(candidate.name)) {
+  if (candidate.type === 'property' && !isValidPropName(candidate.name) && !isParsableCssValue(candidate.name, candidate.value)) {
     return null
   }
 
@@ -49,7 +52,7 @@ function parseRawCandidate(raw, context) {
   }
 
   // Ignore invalid arbitrary values
-  if (candidate.type === 'custom' && !isValidArbitraryValue(candidate.value) || !isParsableCssValue(candidate.value)) {
+  if (candidate.type === 'custom' && !isValidArbitraryValue(candidate.value)) {
     return null
   }
 
@@ -65,15 +68,15 @@ function parseRawCandidate(raw, context) {
  *
  * @param {string} raw
  * @param {any} context
-  * @returns {Candidate | null}
+ * @returns {Candidate | null}
  */
 function parseStructure(raw, context) {
   let separator = context.tailwindConfig.separator
   let VARIANT_SEPARATOR_PATTERN = new RegExp(`\\${separator}(?![^[]*\\])`, 'g')
 
   // Parse out the variants
-  let [candidate, ...variants] = raw.split(VARIANT_SEPARATOR_PATTERN).reverse()
-  variants = variants.reverse().map(parseVariant)
+  let [candidate, ...rawVariants] = raw.split(VARIANT_SEPARATOR_PATTERN).reverse()
+  let variants = rawVariants.reverse().map(parseVariant)
 
   // Important?
   let important = candidate[0] === '!'
@@ -97,10 +100,13 @@ function parseStructure(raw, context) {
   }
 
   // Modifier at the end
-  let modifiers = parseModifiers(candidate)
-  if (modifiers) {
-    candidate = modifiers[0]
-    modifiers = [modifiers[1]]
+  let rawModifiers = parseModifiers(candidate)
+
+  /** @type {CandidateModifier[]} */
+  let modifiers = []
+  if (rawModifiers) {
+    candidate = rawModifiers[0]
+    modifiers = [rawModifiers[1]]
   } else {
     modifiers = []
   }
@@ -110,7 +116,7 @@ function parseStructure(raw, context) {
 
     // This is always gonna be the same
     // but is included for completeness
-    prefix: context.tailwindConfig.prefix ?? "",
+    prefix: context.tailwindConfig.prefix ?? '',
     important,
     variants,
     negative,
@@ -122,7 +128,8 @@ function parseStructure(raw, context) {
   let arbitraryProperty = parseArbitraryProperty(candidate)
   if (arbitraryProperty) {
     return Object.assign(common, {
-      type: "property",
+      /** @type {'property'} */
+      type: 'property',
       name: arbitraryProperty[0],
       value: arbitraryProperty[1],
     })
@@ -131,14 +138,16 @@ function parseStructure(raw, context) {
   let arbitraryValue = parseArbitraryValue(candidate)
   if (arbitraryValue) {
     return Object.assign(common, {
-      type: "custom",
+      /** @type {'custom'} */
+      type: 'custom',
       name: arbitraryValue[0],
       value: arbitraryValue[1],
     })
   }
 
   return Object.assign(common, {
-    type: "utility",
+    /** @type {'utility'} */
+    type: 'utility',
     name: candidate,
   })
 }
@@ -160,7 +169,7 @@ function parseArbitraryProperty(str) {
 
 /**
  *
- * @param {string} str
+ * @param {string} raw
  * @returns {[string, string] | null}
  */
 function parseArbitraryValue(raw) {
@@ -173,20 +182,21 @@ function parseArbitraryValue(raw) {
     return null
   }
 
-  return [
-    raw.slice(0, arbitraryStart),
-    raw.slice(arbitraryStart + 2, -1)
-  ]
+  return [raw.slice(0, arbitraryStart), raw.slice(arbitraryStart + 2, -1)]
 }
 
 /**
  *
- * @param {string} str
+ * @param {string} raw
  * @returns {CandidateVariant}
  */
 function parseVariant(raw) {
   if (raw[0] === '[' && raw[raw.length - 1] === ']') {
-    return { type: 'custom', value: raw.slice(1, -1) }
+    return {
+      /** @type {'custom'} */
+      type: 'custom',
+      value: raw.slice(1, -1),
+    }
   }
 
   return raw
@@ -208,17 +218,14 @@ function parseModifiers(raw) {
     return [
       raw.slice(0, match.index),
       {
-        type: "custom",
+        type: 'custom',
         value: match[1],
-      }
+      },
     ]
   }
 
   if (match[2] !== undefined) {
-    return [
-      raw.slice(0, match.index),
-      match[2]
-    ]
+    return [raw.slice(0, match.index), match[2]]
   }
 
   return null
@@ -243,11 +250,9 @@ function looksLikeUri(declaration) {
 
   try {
     const url = new URL(declaration)
-    return url.scheme !== '' && url.host !== ''
+    return url.protocol !== '' && url.host !== ''
   } catch (err) {
     // Definitely not a valid url
     return false
   }
 }
-
-module.exports.parseCandidate = parseCandidate
