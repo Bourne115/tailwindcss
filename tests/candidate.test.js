@@ -5,6 +5,7 @@ it.each([
     'w',
     {
       raw: 'w',
+      withoutVariants: 'w',
       important: false,
       negative: false,
       prefix: '',
@@ -18,6 +19,7 @@ it.each([
     'w-4',
     {
       raw: 'w-4',
+      withoutVariants: 'w-4',
       important: false,
       negative: false,
       prefix: '',
@@ -31,6 +33,7 @@ it.each([
     'sm:w',
     {
       raw: 'sm:w',
+      withoutVariants: 'w',
       important: false,
       negative: false,
       prefix: '',
@@ -44,6 +47,7 @@ it.each([
     'w-[2px]',
     {
       raw: 'w-[2px]',
+      withoutVariants: 'w-[2px]',
       important: false,
       negative: false,
       prefix: '',
@@ -52,12 +56,14 @@ it.each([
       type: 'custom',
       name: 'w',
       value: '2px',
+      valueType: 'any',
     },
   ],
   [
     'sm:w-[2px]',
     {
       raw: 'sm:w-[2px]',
+      withoutVariants: 'w-[2px]',
       important: false,
       negative: false,
       prefix: '',
@@ -66,12 +72,30 @@ it.each([
       type: 'custom',
       name: 'w',
       value: '2px',
+      valueType: 'any',
+    },
+  ],
+  [
+    'sm:w-[length:2px]',
+    {
+      raw: 'sm:w-[length:2px]',
+      withoutVariants: 'w-[length:2px]',
+      important: false,
+      negative: false,
+      prefix: '',
+      variants: ['sm'],
+      modifiers: [],
+      type: 'custom',
+      name: 'w',
+      value: '2px',
+      valueType: 'length',
     },
   ],
   [
     'sm:w-[2px]/20',
     {
       raw: 'sm:w-[2px]/20',
+      withoutVariants: 'w-[2px]/20',
       important: false,
       negative: false,
       prefix: '',
@@ -80,12 +104,14 @@ it.each([
       type: 'custom',
       name: 'w',
       value: '2px',
+      valueType: 'any',
     },
   ],
   [
     'sm:w-[2px]/[0.55]',
     {
       raw: 'sm:w-[2px]/[0.55]',
+      withoutVariants: 'w-[2px]/[0.55]',
       important: false,
       negative: false,
       prefix: '',
@@ -94,12 +120,14 @@ it.each([
       type: 'custom',
       name: 'w',
       value: '2px',
+      valueType: 'any',
     },
   ],
   [
     'sm:w-[calc(0.5rem_+_1px)]',
     {
       raw: 'sm:w-[calc(0.5rem_+_1px)]',
+      withoutVariants: 'w-[calc(0.5rem_+_1px)]',
       important: false,
       negative: false,
       prefix: '',
@@ -108,12 +136,14 @@ it.each([
       type: 'custom',
       name: 'w',
       value: 'calc(0.5rem + 1px)',
+      valueType: 'any',
     },
   ],
   [
     '[width:2px]',
     {
       raw: '[width:2px]',
+      withoutVariants: '[width:2px]',
       important: false,
       negative: false,
       prefix: '',
@@ -128,6 +158,7 @@ it.each([
     'sm:[width:2px]',
     {
       raw: 'sm:[width:2px]',
+      withoutVariants: '[width:2px]',
       important: false,
       negative: false,
       prefix: '',
@@ -142,6 +173,7 @@ it.each([
     'sm:focus:[width:2px]',
     {
       raw: 'sm:focus:[width:2px]',
+      withoutVariants: '[width:2px]',
       important: false,
       negative: false,
       prefix: '',
@@ -156,6 +188,7 @@ it.each([
     'sm:[@media(min-width:200px)]:[width:2px]',
     {
       raw: 'sm:[@media(min-width:200px)]:[width:2px]',
+      withoutVariants: '[width:2px]',
       important: false,
       negative: false,
       prefix: '',

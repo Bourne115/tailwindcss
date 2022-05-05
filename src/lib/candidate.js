@@ -1,6 +1,7 @@
 // @ts-check
 
 /** @typedef {import('./candidate.d').Candidate} Candidate */
+/** @typedef {import('./candidate.d').DataType} DataType */
 /** @typedef {import('./candidate.d').CandidateVariant} CandidateVariant */
 /** @typedef {import('./candidate.d').CandidateModifier} CandidateModifier */
 
@@ -8,7 +9,7 @@ import { normalize } from '../util/dataTypes.js'
 import isValidArbitraryValue from '../util/isValidArbitraryValue.js'
 import { isParsableCssValue } from './generateRules.js'
 
-/** @type {Map<string, Candidate | null>} */
+/** @type {Map<string, Candidate>} */
 let candidateCache = new Map()
 
 /**
@@ -76,6 +77,7 @@ function parseStructure(raw, context) {
 
   // Parse out the variants
   let [candidate, ...rawVariants] = raw.split(VARIANT_SEPARATOR_PATTERN).reverse()
+  let withoutVariants = candidate
   let variants = rawVariants.reverse().map(parseVariant)
 
   // Important?
@@ -113,6 +115,7 @@ function parseStructure(raw, context) {
 
   let common = {
     raw,
+    withoutVariants,
 
     // This is always gonna be the same
     // but is included for completeness
@@ -142,6 +145,7 @@ function parseStructure(raw, context) {
       type: 'custom',
       name: arbitraryValue[0],
       value: arbitraryValue[1],
+      valueType: arbitraryValue[2],
     })
   }
 
@@ -170,7 +174,7 @@ function parseArbitraryProperty(str) {
 /**
  *
  * @param {string} raw
- * @returns {[string, string] | null}
+ * @returns {[string, string, DataType] | null}
  */
 function parseArbitraryValue(raw) {
   let arbitraryStart = raw.indexOf('-[')
@@ -182,7 +186,21 @@ function parseArbitraryValue(raw) {
     return null
   }
 
-  return [raw.slice(0, arbitraryStart), raw.slice(arbitraryStart + 2, -1)]
+  let dataTypeSeparator = raw.indexOf(':')
+  if (dataTypeSeparator === -1) {
+    return [
+      raw.slice(0, arbitraryStart),
+      raw.slice(arbitraryStart + 2, -1),
+      'any'
+    ]
+  }
+
+  return [
+    raw.slice(0, arbitraryStart),
+    raw.slice(dataTypeSeparator + 1, -1),
+    // @ts-ignore
+    raw.slice(arbitraryStart + 2, dataTypeSeparator),
+  ]
 }
 
 /**
